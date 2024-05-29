@@ -1,6 +1,9 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from jinja2 import Environment, PackageLoader, select_autoescape
 
+env = Environment(
+    loader=PackageLoader("quick_form"),
+    autoescape=select_autoescape()
+)
 
 class Field:
     def __init__(self, field_name, validation = None) -> None:
@@ -49,3 +52,6 @@ class QuickForm:
                   raise TypeError("must be of type Row!")
         self.rows.append(row)
         return self.rows[-1]
+    def render(self) -> None:
+        template = env.get_template("index.html")
+        print(template.render(form=self))

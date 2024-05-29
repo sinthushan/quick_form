@@ -12,6 +12,4 @@ row.add_column()
 
 input = Input("Name")
 new_row.columns[1].add_field(input)
-for row in my_form.rows:
-    print(row)
-print(my_form.rows[3].columns[1].fields[0].field_name)
+my_form.render()
