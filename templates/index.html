@@ -1,3 +1,43 @@
-{% for row in form.rows %}
-    <li>This is a row</li>
-{% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{form.header}}</title>
+    <style>
+        form {
+         display: flex;
+         flex-direction: column;
+        }
+        .form-row{
+            display: flex;
+            flex-direction: row;
+        }
+        h1 {
+          color: maroon;
+          margin-left: 40px;
+        }
+     </style>
+</head>
+<body>
+    <h1>{{form.header}}</h1>
+    <form action="{{form.action}}" method="{{form.method}}">
+        {% for row in form.rows %}
+            <div class="form-row">
+                {% for field in row.fields %}
+                    <div>
+                        <label for="{{field.field_name}}">{{field.label}}</label>
+                        <input type="text" name="{{field.field_name}}" id="{{field.field_name}}">
+                    </div>
+                {% endfor %}
+            </div>
+           
+        {% endfor %}
+        <div class="form-button">
+            <input type="submit" value="{{form.button_label}}" />
+        </div>
+    </form>
+</body>
+</html>
+
+

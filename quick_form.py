@@ -1,4 +1,7 @@
+import webbrowser
+import os
 from jinja2 import Environment, PackageLoader, select_autoescape
+from typing import List
 
 env = Environment(
     loader=PackageLoader("quick_form"),
@@ -6,52 +9,67 @@ env = Environment(
 )
 
 class Field:
-    def __init__(self, field_name, validation = None) -> None:
-        self.field_name = field_name      
+    def __init__(self, field_name: str, label: str = None, validation = None) -> None:
+        self.field_name = field_name
+        if label is None:
+            label = field_name
+        self.label = label      
         self.validation = validation
 
 class Input(Field):
     def __init__(self, field_name, validation=None) -> None:
          super().__init__(field_name, validation)      
 
-class Column:
-    def __init__(self) -> None:
-        self.fields = []
-    def add_field(self, field: Field) -> Field:
-        if not isinstance(field, Field):
-            raise TypeError("must be of type Field!")
-        self.fields.append(field)
-        return self.fields[-1]
-    def __str__(self) -> str:
-        return "This is your column"
-
 class Row:
     def __init__(self) -> None:
-        self.columns = []
-    def add_column(self, column: Column = None) -> Column:
-        if not column:
-            column = Column()
-        else:
-            if not isinstance(column, Column):
-                raise TypeError("must be of type Column!")
-        self.columns.append(column)
-        return self.columns[-1]
-    def __str__(self) -> str:
-            column_count = len(self.columns)
-            return f"This row is divided into {column_count} columns"
+        self._fields = []
+    @property
+    def fields(self) -> List[Field]:
+        return self._fields
 
     
 class QuickForm:
-    def __init__(self) -> None:
-        self.rows = []
+    def __init__(self, header: str = "My Form", action: str = "#", method: str = "post", button_label: str = "Submit") -> None:
+        self.header = header
+        self.action = action
+        self.method = method
+        self.button_label = button_label
+        self._rows = []
+        self._fields = []
+    @property
+    def rows(self) -> List[Row]:
+        return self._rows
+    
+    @property
+    def fields(self) -> List[Row]:
+        return self._fields
+
     def add_row(self, row: Row = None) -> Row:
         if not row:
              row = Row()
         else:
              if not isinstance(row, Row):
                   raise TypeError("must be of type Row!")
-        self.rows.append(row)
+        self._rows.append(row)
         return self.rows[-1]
-    def render(self) -> None:
+    
+    def add_field(self, row: Row, field: Field) -> Field:
+        if isinstance(row, int):
+            row = self.rows[row]
+        elif not isinstance(row, Row):
+           raise TypeError('row argument must be of type Row or Int')
+        
+        if isinstance(field, Field): 
+            row._fields.append(field)
+            self._fields.append(field)
+            return self.fields[-1]
+        else:
+            raise TypeError("field argument must be of type Field")
+    
+    def render(self, file_path: str) -> None:
         template = env.get_template("index.html")
-        print(template.render(form=self))
+        output = template.render(form=self)
+        with open(file_path, 'w') as HTML_form:
+            HTML_form.write(output)
+        webbrowser.open('file://' + os.path.realpath(file_path))
+        
