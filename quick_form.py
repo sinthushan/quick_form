@@ -9,16 +9,22 @@ env = Environment(
 )
 
 class Field:
-    def __init__(self, field_name: str, label: str = None, validation = None) -> None:
+    def __init__(self, field_name: str, label: str = None, hidden: bool = False) -> None:
         self.field_name = field_name
         if label is None:
             label = field_name
         self.label = label      
-        self.validation = validation
+        self.hidden = hidden
+        self.hide_when = {}
+        self.show_when = {}
+        self.changeHandle = "handle" + self.field_name
+
+
 
 class Input(Field):
-    def __init__(self, field_name, validation=None) -> None:
-         super().__init__(field_name, validation)      
+    def __init__(self, field_name: str, label: str = None, hidden: bool = False) -> None:
+         super().__init__(field_name, label, hidden)
+
 
 class Row:
     def __init__(self) -> None:
@@ -36,6 +42,7 @@ class QuickForm:
         self.button_label = button_label
         self._rows = []
         self._fields = []
+    
     @property
     def rows(self) -> List[Row]:
         return self._rows
@@ -72,4 +79,16 @@ class QuickForm:
         with open(file_path, 'w') as HTML_form:
             HTML_form.write(output)
         webbrowser.open('file://' + os.path.realpath(file_path))
+    
+    def hide_if(self, target_field: Field, event_field: Field, value: str) -> None:
+        if value in event_field.hide_when:
+            event_field.hide_when[value].append(target_field)
+        else:
+            event_field.hide_when[value] = [target_field]
+    def show_if(self, target_field: Field, event_field: Field, value: str) -> None:
+        if value in event_field.show_when:
+            event_field.show_when[value].append(target_field)
+        else:
+            event_field.show_when[value] = [target_field]
+
         

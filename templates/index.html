@@ -25,7 +25,7 @@
         {% for row in form.rows %}
             <div class="form-row">
                 {% for field in row.fields %}
-                    <div>
+                    <div {% if field.hidden %}hidden=true{% endif %}>
                         <label for="{{field.field_name}}">{{field.label}}</label>
                         <input type="text" name="{{field.field_name}}" id="{{field.field_name}}">
                     </div>
@@ -37,6 +37,42 @@
             <input type="submit" value="{{form.button_label}}" />
         </div>
     </form>
+
+<script>
+
+    {% for field in form.fields %}
+        document.getElementById("{{field.field_name}}").addEventListener("change", {{field.changeHandle}});
+    {% endfor %}
+
+    {% for field in form.fields %}
+       function {{field.changeHandle}}(){
+        let event_field = document.getElementById("{{field.field_name}}");
+        {% for key in field.hide_when %}
+            if (event_field.value =="{{key}}"){
+                {% for hide_field in field.hide_when[key] %}
+                    document.getElementById("{{hide_field.field_name}}").parentElement.style.display = "none";
+                {% endfor %}  
+            } else{
+                {% for hide_field in field.hide_when[key] %}
+                    document.getElementById("{{hide_field.field_name}}").parentElement.style.display = "block";
+                {% endfor %}  
+            }
+        {% endfor %}
+        {% for key in field.show_when %}
+            if (event_field.value =="{{key}}"){
+                {% for show_field in field.show_when[key] %}
+                    document.getElementById("{{show_field.field_name}}").parentElement.removeAttribute("hidden");
+                {% endfor %}  
+            } else{
+                {% for show_field in field.show_when[key] %}
+                    document.getElementById("{{show_field.field_name}}").parentElement.setAttribute("hidden", true);
+                {% endfor %}  
+            }
+        {% endfor %}
+       }
+    {% endfor %}
+</script>
+
 </body>
 </html>
 
